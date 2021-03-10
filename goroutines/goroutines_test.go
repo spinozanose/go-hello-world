@@ -9,6 +9,16 @@ import (
 	"github.com/spinozanose/go-hello-world/goroutines"
 )
 
+//runtime.GOMAXPROCS(1) <--single threaded
+//runtime.GOMAXPROCS(4) <--one thread per core is typical (and default)
+//runtime.GOMAXPROCS(-1) <--does not change, just reads
+
+// Best Practices:
+// - Don't create goroutines in libraries (unless returning channels)
+// - To avoid memory leaks, make sure you know how a routine will end
+// - Check for race conditions at compile time
+//    - go run -race
+
 var waitGroup = sync.WaitGroup{}
 
 func TestGoRoutines(t *testing.T) {
@@ -39,16 +49,6 @@ func TestWaitGroup(t *testing.T) {
 
 var counter = 0
 var m = sync.RWMutex{} //multiple readers, write is locked
-
-//runtime.GOMAXPROCS(1) <--single threaded
-//runtime.GOMAXPROCS(4) <--one thread per core is typical (and default)
-//runtime.GOMAXPROCS(-1) <--does not change, just reads
-
-// Best Practices:
-// - Don't create goroutines in libraries (unless returning channels)
-// - To avoid memory leaks, make sure you know how a routine will end
-// - Check for race conditions at compile time
-//    - go run -race
 
 func TestSynchronization(t *testing.T) {
 	// This actually eliminates the benefits of parallelism because it now
