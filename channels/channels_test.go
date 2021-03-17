@@ -195,18 +195,19 @@ func logger() {
 // this construct, a type of a struct with no fields, cannot carry a message. It is a
 // "signal-only" channel. It can only have the properties of whether a message was sent or received.
 var doneCh = make(chan struct{})
+var logCh2 = make(chan logEntry, 50)
 
 func TestSelectLogger(t *testing.T) {
 
 	go selectLogger()
 
 	// let's add a log entry
-	logCh <- logEntry{time.Now(), logInfo, "App is starting"}
+	logCh2 <- logEntry{time.Now(), logInfo, "App is starting"}
 
 	time.Sleep(5 * time.Second) // Application runs here
 
 	// then end
-	logCh <- logEntry{time.Now(), logInfo, "App is shutting down"}
+	logCh2 <- logEntry{time.Now(), logInfo, "App is shutting down"}
 	time.Sleep(100 * time.Millisecond) // gives the logger time to finish
 	doneCh <- struct{}{}               // this fails to send anything through the channel, but does carry a signal
 }
@@ -214,10 +215,10 @@ func TestSelectLogger(t *testing.T) {
 func selectLogger() {
 	for {
 		select { // this like a switch statement, but only used for channels
-		case entry := <-logCh:
+		case entry := <-logCh2:
 			fmt.Printf("%v - [%v]%v\n", entry.time.Format("2006-01-02T15:04:05"), entry.severity, entry.message)
 		case <-doneCh:
-			fmt.Println("Logger shutting done, too")
+			fmt.Println("Logger shutting down, too")
 			break
 			// with no default case, this is a blocking select. Add a default case and it no longer blocks.
 		}
